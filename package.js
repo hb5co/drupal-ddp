@@ -13,11 +13,11 @@ Package.describe({
 Package.onUse(function(api) {
   api.versionsFrom('1.0.3.1');
   api.use('mongo', ['client', 'server']);
-  api.addFiles('drupal-ddp.js');
+  api.addFiles('server.js', ['server']);
 });
 
 Package.onTest(function(api) {
   api.use('tinytest');
-  api.use('drupal-ddp');
+  api.addFiles('server.js', ['server']);
   api.addFiles('tests.js');
 });
