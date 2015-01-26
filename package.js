@@ -12,6 +12,7 @@ Package.describe({
 
 Package.onUse(function(api) {
   api.versionsFrom('1.0.3.1');
+  api.use('mongo', ['client', 'server']);
   api.addFiles('drupal-ddp.js');
 });
 
