@@ -1,16 +1,16 @@
-Posts = new Mongo.Collection('posts');
+drupalDdpNodes = new Mongo.Collection('drupal_ddp_nodes');
 
 if (Meteor.isServer) {
   Meteor.methods({
-    // Accept post node inserts and updates from Drupal.
-    Post: function (data) {
+    // Accept node inserts and updates from Drupal.
+    DrupalSaveNode: function (data) {
       if (data.node.is_new) {
-        // Add new posts.
-        Posts.insert(data);
+        // Add new nodes.
+        drupalDdpNodes.insert(data);
       }
       else {
-        // Update existing posts.
-        Posts.update({"node.nid": data.node.nid},{$set:{node:data.node}});
+        // Update existing nodes.
+        druaplDdpNodes.update({"node.nid": data.node.nid},{$set:{node:data.node}});
       }
     }
   });
