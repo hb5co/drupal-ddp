@@ -10,7 +10,7 @@ if (Meteor.isServer) {
       }
       else {
         // Update existing nodes.
-        druaplDdpNodes.update({"node.nid": data.node.nid},{$set:{node:data.node}});
+        drupalDdpNodes.update({"node.nid": data.node.nid},{$set:{node:data.node}});
       }
     }
   });
