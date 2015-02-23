@@ -13,6 +13,7 @@ Package.describe({
 Package.onUse(function(api) {
   api.versionsFrom('1.0.3.1');
   api.use('mongo', ['client', 'server']);
+  api.use('minimongo', ['client']);
   api.addFiles('collections.js', ['client', 'server']);
   api.addFiles('server.js', ['server']);
 });
