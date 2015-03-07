@@ -20,7 +20,7 @@ Package.onUse(function(api) {
 
   // Files for Client & Server
   api.addFiles([
-    'collections/nodes.js', 
+    'collections/nodes.js',
     'collections/taxonomies.js'
     ], both);
 
