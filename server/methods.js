@@ -36,5 +36,34 @@ Meteor.methods({
         drupalDdpTaxonomies.update({"content.tid": data.content.tid},{$set:{content:data.content}});
       }
     }
+
+    // Handle Users
+    if(data.content.ddp_type == 'user'){
+      if (data.content.is_new) {
+        // Create User
+        Accounts.createUser({
+          username: data.content.name,
+          email : data.content.mail,
+          password : data.content.pass,
+          profile  : {
+            first_name: 'First',
+            last_name: 'Last',
+            uid: data.content.uid,
+            roles: data.content.roles,
+          }
+        });
+
+        // Set account 'verified' to true
+        Meteor.users.update({"profile.uid": data.content.uid}, {$set: {"emails.0.verified" :true}});
+      }
+      else if(data.content.delete_content){
+        // Delete existing taxonomies.
+        drupalDdpUsers.remove({"content.tid": data.content.tid});
+      }
+      else {
+        // Update existing taxonomies.
+        drupalDdpUsers.update({"content.tid": data.content.tid},{$set:{content:data.content}});
+      }
+    }
   }
 });
