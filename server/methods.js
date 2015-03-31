@@ -4,17 +4,21 @@ Meteor.methods({
     console.log(data);
     // Handle Nodes
     if(data.content.ddp_type == 'node'){
+      var actualColl = DrupalDdp.collections[data.content.type];
+      if (!actualColl) {
+        throw new Meteor.Error("You haven't registered this type of collection yet.");
+      }
       if (data.content.is_new) {
         // Add new posts.
-        drupalDdpNodes.insert(data);
+        actualColl.insert(data);
       }
       else if(data.content.delete_content){
         // Delete existing posts.
-        drupalDdpNodes.remove({"content.nid": data.content.nid});
+        actualColl.remove({"content.nid": data.content.nid});
       }
       else {
         // Update existing posts.
-        drupalDdpNodes.update({"content.nid": data.content.nid},{$set:{content:data.content}});
+        actualColl.upsert({"content.nid": data.content.nid},{$set: data.content});
       }
     }
 
