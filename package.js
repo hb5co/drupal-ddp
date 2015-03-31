@@ -28,11 +28,13 @@ Package.onUse(function(api) {
   api.addFiles([
     'server/methods.js',
     'server/publications.js',
+    'server/config.js'
     ], 'server');
 
   // Publish Collections to Client
   api.export('drupalDdpNodes');
-  api.export('drupalDdpTaxonomies')
+  api.export('drupalDdpTaxonomies');
+  api.export('DrupalDdp');
 });
 
 Package.onTest(function(api) {
