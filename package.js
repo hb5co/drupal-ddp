@@ -23,14 +23,9 @@ Package.onUse(function(api) {
 
   // Files for Client & Server
   api.addFiles([
-<<<<<<< HEAD
-    'collections/nodes.js',
-    'collections/taxonomies.js'
-=======
     'collections/nodes.js', 
     'collections/taxonomies.js',
     'collections/users.js'
->>>>>>> Added users collection
     ], both);
 
   // Files for Server
@@ -43,10 +38,7 @@ Package.onUse(function(api) {
   // Publish Collections to Client
   api.export('drupalDdpNodes');
   api.export('drupalDdpTaxonomies');
-<<<<<<< HEAD
   api.export('DrupalDdp');
-=======
->>>>>>> Added users collection
 });
 
 Package.onTest(function(api) {
