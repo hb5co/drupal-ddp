@@ -4,7 +4,10 @@ Meteor.methods({
   },
   // Accept node inserts and updates from Drupal.
   DrupalSaveNode: function (data) {
-    console.log(data);
+    if (Meteor.settings.drupal_ddp.debug_data == true) {
+      console.log(data);
+    }
+    
     // Handle Nodes
     if(data.content.ddp_type == 'node'){
       var actualColl = DrupalDdp.collections[data.content.type];
@@ -56,7 +59,7 @@ Meteor.methods({
           }
         });
 
-        // Set account 'verified' to true
+        // Set account 'verified' to true and set password to drupal password.
         Meteor.users.update({"profile.uid" : data.content.uid}, {$set: {"emails.0.verified" : true}});
         Meteor.users.update({"profile.uid" : data.content.uid}, {$set: {"services.password.bcrypt" : data.content.pass}});
       }
@@ -66,6 +69,7 @@ Meteor.methods({
         Meteor.users.remove(user_id);
       }
       else {
+        // TODO
         // Update existing user.
         // update profile
         // update name & password
@@ -73,7 +77,6 @@ Meteor.methods({
         // update email
         // update roles
         // Meteor.users.update({"profile.uid" : data.content.uid});
-
       }
     }
   },
@@ -107,38 +110,56 @@ Meteor.methods({
   updateNodeInDrupal: function(node) {
     tokenCookie = Meteor.call('getDrupalDdpToken');
 
-    // Get node body out of array
-    node.content.body =  node.content.body.und[0];
-
+    // Preparing the node to be sent back to Drupal.
     node = node.content;
+    
+    if (Meteor.settings.drupal_ddp.debug_data == true) {
+      console.log('======== Content Going back to drupal ==========');
+      console.log(node);
+    }
 
     // Remove items in the node that aren't supported for writing
     // via restws in Drupal.
     cleanUpNode = [
       'is_new',
       'vid',
-      'uid',
       'ddp_type',
       'comment',
+      'comments',
       'changed',
-      'tnid',
-      'translate',
-      'rdf_mapping',
-      'revision_timestamp',
-      'revision_uid',
-      'cid',
-      'last_comment_timestamp',
-      'last_comment_name',
-      'last_comment_uid',
+      'url',
+      'edit_url',
       'comment_count',
-      'name',
-      'picture',
-      'data'
+      'comment_count_new',
     ];
 
-    $.each(cleanUpNode, function(){
-      node.remove(this);
+    // Check for File fields and remove.
+    _.each(node, function(value, key, obj){
+      // If obj is array
+      if(_.isArray(value) && !_.isNull(value) && !_.isEmpty(value)) {
+        // If 'file' exists here, then it's a file_field,
+        // add key cleanUpNode array.
+        if(_.has(value[0], 'file')) {
+          cleanUpNode.push(key);
+        }
+
+        // If 'tid' exists here, then it's a taxonomy term,
+        // add key to cleanUpNode array.
+        if(_.has(value[0], 'tid')) {
+          cleanUpNode.push(key);
+        }
+      }
     });
+
+    // Remove fields from node object that aren't supported
+    // for writing back to drupal.
+    node = _.omit(node, cleanUpNode);
+
+    if (Meteor.settings.drupal_ddp.debug_data == true) {
+      // console.log('====== START: Data sent to Drupal from updateNodeInDrupal ======');
+      // console.log(node);
+      // console.log('====== END: Data sent to Drupal from updateNodeInDrupal ======');
+    }
 
     if (tokenCookie) {
       try {
@@ -154,16 +175,16 @@ Meteor.methods({
               'Accept': 'application/json',
               'Cookie': tokenCookie.cookie,
             },
-            params: {
-              name: 'restws_login',
-              pass: 'password',
-              form_id: 'user_login_form'
-            },
             data: node
           }
         );
         return result;
       } catch (e) {
+        if (Meteor.settings.drupal_ddp.debug_data == true) {
+          console.log('====== START: Server Response ======');
+          console.log(e);
+          console.log('====== END: Server Response ======');
+        }
         return false;
       }
     }
