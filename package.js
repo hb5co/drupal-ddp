@@ -31,7 +31,6 @@ Package.onUse(function(api) {
   // Files for Server
   api.addFiles([
     'server/methods.js',
-    'server/publications.js',
     'server/config.js'
     ], 'server');
 
