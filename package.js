@@ -16,18 +16,21 @@ Package.onUse(function(api) {
   var both = ['client', 'server'];
 
   // Packages for Client & Server
-  api.use('mongo', both);
+  api.use([
+    'mongo',
+    'accounts-password'
+    ], both);
 
   // Files for Client & Server
   api.addFiles([
-    'collections/nodes.js',
-    'collections/taxonomies.js'
+    'collections/nodes.js', 
+    'collections/taxonomies.js',
+    'collections/users.js'
     ], both);
 
   // Files for Server
   api.addFiles([
     'server/methods.js',
-    'server/publications.js',
     'server/config.js'
     ], 'server');
 
