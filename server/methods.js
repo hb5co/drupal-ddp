@@ -4,7 +4,7 @@ Meteor.methods({
   },
   // Accept node inserts and updates from Drupal.
   DrupalSaveNode: function (data) {
-    if (Meteor.settings.drupal_ddp.debug_data == true) {
+    if (Meteor.settings.drupal_ddp.debug_data === true) {
       console.log(data);
     }
     
@@ -20,11 +20,11 @@ Meteor.methods({
       }
       else if(data.content.delete_content){
         // Delete existing posts.
-        actualColl.remove({"content.nid": data.content.nid});
+        actualColl.remove({nid: data.content.nid});
       }
       else {
         // Update existing posts.
-        actualColl.upsert({"content.nid": data.content.nid},{$set: data.content});
+        actualColl.upsert({nid: data.content.nid},{$set: data.content});
       }
     }
 
@@ -173,7 +173,7 @@ Meteor.methods({
         );
         return result;
       } catch (e) {
-        if (Meteor.settings.drupal_ddp.debug_data == true) {
+        if (Meteor.settings.drupal_ddp.debug_data === true) {
           console.log('====== START: Server Response ======');
           console.log(e);
           console.log('====== END: Server Response ======');
