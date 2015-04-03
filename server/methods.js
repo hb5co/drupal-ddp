@@ -81,9 +81,8 @@ Meteor.methods({
     }
   },
   getDrupalDdpToken: function() {
-    var drupalDdpUrl = Meteor.settings.drupal_ddp.ddp_url;
     var options = {
-      url: drupalDdpUrl + "/restws/session/token",
+      url: Meteor.settings.drupal_ddp.ddp_url + "/restws/session/token",
       username : Meteor.settings.drupal_ddp.restws_user,
       password : Meteor.settings.drupal_ddp.restws_pass,
     };
@@ -118,7 +117,7 @@ Meteor.methods({
       console.log(node);
     }
 
-    // Remove items in the node that aren't supported for writing
+    // These are items in a node that aren't supported for writing
     // via restws in Drupal.
     cleanUpNode = [
       'is_new',
@@ -154,12 +153,6 @@ Meteor.methods({
     // Remove fields from node object that aren't supported
     // for writing back to drupal.
     node = _.omit(node, cleanUpNode);
-
-    if (Meteor.settings.drupal_ddp.debug_data == true) {
-      // console.log('====== START: Data sent to Drupal from updateNodeInDrupal ======');
-      // console.log(node);
-      // console.log('====== END: Data sent to Drupal from updateNodeInDrupal ======');
-    }
 
     if (tokenCookie) {
       try {
