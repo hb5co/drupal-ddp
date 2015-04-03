@@ -16,23 +16,28 @@ Package.onUse(function(api) {
   var both = ['client', 'server'];
 
   // Packages for Client & Server
-  api.use('mongo', both);
+  api.use([
+    'mongo',
+    'accounts-password'
+    ], both);
 
   // Files for Client & Server
   api.addFiles([
     'collections/nodes.js', 
-    'collections/taxonomies.js'
+    'collections/taxonomies.js',
+    'collections/users.js'
     ], both);
 
   // Files for Server
   api.addFiles([
     'server/methods.js',
-    'server/publications.js',
+    'server/config.js'
     ], 'server');
 
   // Publish Collections to Client
   api.export('drupalDdpNodes');
-  api.export('drupalDdpTaxonomies')
+  api.export('drupalDdpTaxonomies');
+  api.export('DrupalDdp');
 });
 
 Package.onTest(function(api) {
