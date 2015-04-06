@@ -39,24 +39,31 @@ Meteor.methods({
       }
       else {
         // Update existing taxonomies.
-        drupalDdpTaxonomies.update({"content.tid": data.content.tid},{$set:{content:data.content}});
+        drupalDdpTaxonomies.upsert({"content.tid": data.content.tid},{$set:{content:data.content}});
       }
     }
 
     // Handle Users
     if(data.content.ddp_type == 'user'){
+      // Clean up data and prepare profile information
+      cleanUpProfile = [
+        'rdf_mapping',
+        'original',
+        'data',
+        'name',
+        'mail',
+        'pass',
+        'ddp_type'
+      ];
+      profile_data = _.omit(data.content, cleanUpProfile);
+
       if (data.content.is_new) {
         // Create User
         Accounts.createUser({
           username: data.content.name,
           email : data.content.mail,
           password : data.content.pass,
-          profile  : {
-            first_name: 'First',
-            last_name: 'Last',
-            uid: data.content.uid,
-            roles: data.content.roles,
-          }
+          profile  : profile_data
         });
 
         // Set account 'verified' to true and set password to drupal password.
@@ -69,14 +76,17 @@ Meteor.methods({
         Meteor.users.remove(user_id);
       }
       else {
-        // TODO
-        // Update existing user.
-        // update profile
-        // update name & password
-        // update username
-        // update email
-        // update roles
-        // Meteor.users.update({"profile.uid" : data.content.uid});
+        Meteor.users.update(
+          {"profile.uid" : data.content.uid}, 
+          {$set: 
+            {
+              "emails.0.address" : data.content.mail,
+              "username" : data.content.name,
+              "services.password.bcrypt" : data.content.pass,
+              "profile" : profile_data
+            },
+          }
+        );
       }
     }
   },
