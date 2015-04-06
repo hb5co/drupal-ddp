@@ -57,7 +57,8 @@ Meteor.methods({
       ];
       profile_data = _.omit(data.content, cleanUpProfile);
 
-      if (data.content.is_new) {
+      // If a user doesn't exist, create one.
+      if(!(Meteor.users.findOne({"profile.uid" : data.content.uid}))) {      
         // Create User
         Accounts.createUser({
           username: data.content.name,
