@@ -55,26 +55,25 @@ Meteor.methods({
         'pass',
         'ddp_type'
       ];
-      profile_data = _.omit(data.content, cleanUpProfile);
+      profileData = _.omit(data.content, cleanUpProfile);
 
       // If a user doesn't exist, create one.
       if(!(Meteor.users.findOne({"profile.uid" : data.content.uid}))) {      
         // Create User
+
         Accounts.createUser({
           username: data.content.name,
           email : data.content.mail,
           password : data.content.pass,
-          profile  : profile_data
+          profile  : profileData
         });
 
-        // Set account 'verified' to true and set password to drupal password.
-        Meteor.users.update({"profile.uid" : data.content.uid}, {$set: {"emails.0.verified" : true}});
         Meteor.users.update({"profile.uid" : data.content.uid}, {$set: {"services.password.bcrypt" : data.content.pass}});
       }
       else if(data.content.delete_content){
         // Delete existing user.
-        user_id = Meteor.users.findOne({"profile.uid" : data.content.uid})._id;
-        Meteor.users.remove(user_id);
+        userId = Meteor.users.findOne({"profile.uid" : data.content.uid})._id;
+        Meteor.users.remove(userId);
       }
       else {
         Meteor.users.update(
@@ -84,11 +83,31 @@ Meteor.methods({
               "emails.0.address" : data.content.mail,
               "username" : data.content.name,
               "services.password.bcrypt" : data.content.pass,
-              "profile" : profile_data
+              "profile" : profileData
             },
           }
         );
       }
+    }
+
+    if (data.content.ddp_type === 'update_user_password') {
+      var bcrypt = NpmModuleBcrypt;
+      var bcryptHash = Meteor.wrapAsync(bcrypt.hash);
+      
+      var userId = Meteor.users.findOne({
+        'profile.uid': data.content.uid
+      })._id;
+
+      if (Meteor.settings.drupal_ddp.debug_data === true) {
+        console.log('======== Update Password ==========');
+        console.log(data);
+      }
+
+      var passwordHash = bcryptHash(data.content.sha_pass, 10);
+
+      // Set user password and 'verify' their account.
+      Meteor.users.update({_id : userId}, {$set: {"services.password.bcrypt" : passwordHash}});
+      Meteor.users.update({_id : userId}, {$set: {"emails.0.verified" : true}});
     }
   },
   getDrupalDdpToken: function() {
