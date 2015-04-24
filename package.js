@@ -1,13 +1,8 @@
 Package.describe({
   name: 'hb5:drupal-ddp',
-  version: '0.0.1',
-  // Brief, one-line summary of the package.
   summary: '',
-  // URL to the Git repository containing the source code for this package.
   git: 'https://github.com/hb5co/drupal-ddp',
-  // By default, Meteor will default to using README.md for documentation.
-  // To avoid submitting documentation, set this field to null.
-  documentation: 'README.md'
+  version: '0.0.1'
 });
 
 Package.onUse(function(api) {
@@ -23,7 +18,7 @@ Package.onUse(function(api) {
 
   // Files for Client & Server
   api.addFiles([
-    'collections/nodes.js', 
+    'collections/nodes.js',
     'collections/taxonomies.js',
     'collections/users.js'
     ], both);
