@@ -32,3 +32,19 @@ Navigate to the *Modules* page in Drupal and enable the module. (http://yourdrup
 
 ### Create content ###
 Creating content that has been selected for use with DDP will pass a json encoded node object over to your meteor app.
+
+### Settings.json ###
+Add this to the root of your Meteor installation as `settings.json`.
+
+```
+{
+  "public": {
+  },
+  "drupal_ddp": {
+    "debug_data": true,
+    "ddp_url": "http://localhost",
+    "restws_user": "restws_login",
+    "restws_pass": "password"
+  }
+}
+```
