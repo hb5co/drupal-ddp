@@ -37,6 +37,7 @@ Package.onUse(function(api) {
 
 Package.onTest(function(api) {
   api.use('tinytest');
-  api.addFiles('server');
+  api.addFiles('server/config.js');
+  api.addFiles('server/methods.js');
   api.addFiles('tests.js');
 });
