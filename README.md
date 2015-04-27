@@ -5,8 +5,7 @@ Drupal and Meteor integration over DDP
 Creates a server method to handle pushing node (insert, update, delete) data from Drupal into mongo database.
 
 ### TODO
-Manage pushing changes made in Meteor to the Drupal installation.
-
+anage pushing changes made in Meteor to the Drupal installation.
 
 #Setting Drupal DDP on Drupal Site.#
 
