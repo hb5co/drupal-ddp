@@ -14,14 +14,13 @@ Meteor.methods({
       if (!actualColl) {
         throw new Meteor.Error("You haven't registered this type of collection yet.");
       }
-      if (data.content.is_new) {
-        // Add new posts.
-        actualColl.insert(data);
-      }
-      else if(data.content.delete_content){
+
+      // If content is flagged for deletion, remove
+      if(data.content.delete_content){
         // Delete existing posts.
         actualColl.remove({nid: data.content.nid});
       }
+      // Otherwise, insert/update.
       else {
         // Update existing posts.
         actualColl.upsert({nid: data.content.nid},{$set: data.content});
@@ -98,11 +97,6 @@ Meteor.methods({
         'profile.uid': data.content.uid
       })._id;
 
-      if (Meteor.settings.drupal_ddp.debug_data === true) {
-        console.log('======== Update Password ==========');
-        console.log(data);
-      }
-
       var passwordHash = bcryptHash(data.content.sha_pass, 10);
 
       // Set user password and 'verify' their account.
@@ -133,19 +127,15 @@ Meteor.methods({
 
       return tokenResponse;
     } catch (e) {
-      return false;
+      if (Meteor.settings.drupal_ddp.debug_data == true) {
+        return e;
+      } else {
+        return false;
+      }
     }
   },
   updateNodeInDrupal: function(node) {
     tokenCookie = Meteor.call('getDrupalDdpToken');
-
-    // Preparing the node to be sent back to Drupal.
-    node = node.content;
-    
-    if (Meteor.settings.drupal_ddp.debug_data == true) {
-      console.log('======== Content Going back to drupal ==========');
-      console.log(node);
-    }
 
     // These are items in a node that aren't supported for writing
     // via restws in Drupal.
@@ -162,7 +152,17 @@ Meteor.methods({
       'comment_count_new',
     ];
 
-    // Check for File fields and remove.
+    // Preparing the node to be sent back to Drupal.
+    if(node.hasOwnProperty('content')){
+      node = node.content;  
+    } else {
+      // Add '_id' to the list of fields to be removed from
+      // the node.
+      cleanUpNode.push('_id');
+    }    
+
+    // Check for File fields and Taxonomy fields to remove
+    // remove because restws can't handle the heat.
     _.each(node, function(value, key, obj){
       // If obj is array
       if(_.isArray(value) && !_.isNull(value) && !_.isEmpty(value)) {
@@ -183,6 +183,11 @@ Meteor.methods({
     // Remove fields from node object that aren't supported
     // for writing back to drupal.
     node = _.omit(node, cleanUpNode);
+
+    if (Meteor.settings.drupal_ddp.debug_data == true) {
+      console.log('======== Content Going back to drupal ==========');
+      console.log(node);
+    }
 
     if (tokenCookie) {
       try {
@@ -208,7 +213,7 @@ Meteor.methods({
           console.log(e);
           console.log('====== END: Server Response ======');
         }
-        return false;
+        return e;
       }
     }
   },
