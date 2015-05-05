@@ -29,7 +29,7 @@ Below is a sample `settings.json` file to be included in the root of your Meteor
 	- Add the restws password from Drupal in place of `your_password`.
 
 
-### Registering Content TYpes
+### Registering Content Types
 In order to save content from Drupal into your MongoDB, you must create a collection and register it.
 
 
