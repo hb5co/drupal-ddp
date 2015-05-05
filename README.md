@@ -28,6 +28,8 @@ Below is a sample `settings.json` file to be included in the root of your Meteor
 	- Create your own restws user and add that in place of `restws_xxxxx` to your settings.json file.
 	- Add the restws password from Drupal in place of `your_password`.
 
+_Run your meteor using the settings.json file by running `meteor --settings ./settings.json` at the root of your app._
+
 
 ### Registering Content Types
 In order to save content from Drupal into your MongoDB, you must create a collection and register it.
@@ -38,7 +40,7 @@ In order to save content from Drupal into your MongoDB, you must create a collec
 		DrupalDdp.registerType('article', Articles); 
 	}
 
-Where ***`articles`*** corresponds to your Drupal content type machine name.
+Where ***`article`*** corresponds to your Drupal content type machine name.
 
 ### Writing data back to Drupal
 Currently, only nodes are supported for writing back to Drupal.
