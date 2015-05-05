@@ -7,6 +7,7 @@ Package.describe({
 
 Package.onUse(function(api) {
   api.versionsFrom('1.0.3.1');
+  api.use('npm-bcrypt@=0.7.8_2');
 
   var both = ['client', 'server'];
 
