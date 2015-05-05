@@ -1,51 +1,53 @@
-### drupal-ddp
-Drupal and Meteor integration over DDP.
+## Drupal-Ddp
+Drupal and Meteor integration over DDP. This meteor package requires the [Drupal DDP drupal module](http://drupal.org/project/drupal_ddp) to function.
 
-This meteor package requires the Drupal DDP drupal module.
+Once set up, it allows Drupal's Node, Taxonomy, and User objects to be synced over to your meteor application.
 
-### Methods
-Creates a server method to handle pushing node (insert, update, delete) data from Drupal into mongo database.
+### Installation
+Install package `meteor add hb5:drupal-ddp`
 
 ### Settings.json
-In order to enable writing data back to Drupal, the [restws](http://drupal.org/project/restws) module.
+A settings.json file is required during the startup of your meteor app. 
 
-The following settings will need to be added to your `settings.json` file.
+Below is a sample `settings.json` file to be included in the root of your Meteor project.
 
-```
-{
-  "drupal_ddp": {
-  	"debug_data": true,
-  	"ddp_url": "http://drupalddp.dev",
-    "restws_user": "restws_login",
-    "restws_pass": "password"
-  }
-}
-```
+	{
+		"drupal_ddp": {
+			"debug_data": true,
+			"ddp_url": "http://drupalddp.dev",
+			"restws_user": "restws_xxxxx",
+			"restws_pass": "your_password"
+		}
+	}
 
-`debug_data: true` will enable you to see all coming in and out of your meteor app.
+**Notes**
 
-#Setting Drupal DDP on Drupal Site.#
+- `debug_data: true` will enable you to see some debug data in the console.
+- `ddp_url` should be the url of your Drupal website (no trailing slash).
+- To enable writing data back to Drupal, a user must be created in Drupal prefixed with `restws_`, and should have read and write access to the content types you wish to write back to.
+	- Create your own restws user and add that in place of `restws_xxxxx` to your settings.json file.
+	- Add the restws password from Drupal in place of `your_password`.
 
-Once you have a working Drupal site going:
 
-### Download Module
-`cd` to `sites/all/modules` and run `git clone --branch 7.x-1.x http://git.drupal.org/sandbox/bfodeke/2354859.git`. This will download the drupal_ddp module to you Drupal site.
+### Registering Content TYpes
+In order to save content from Drupal into your MongoDB, you must create a collection and register it.
 
-### Install Node Dependencies
-`cd` to the newly downloaded module folder (`sites/all/modules/drupal_ddp`) and run `npm install`.
 
-### Run NodeServer
-While in the drupal_ddp module folder, run `node ddp.js`
+	Articles = new Mongo.Collection('article');
+	Meteor(isServer()) { 
+		DrupalDdp.registerType('article', Articles); 
+	}
 
-### Enable Module
-Navigate to the *Modules* page in Drupal and enable the module. (http://yourdrupalsite.dev/admin/modules).
+Where ***`articles`*** corresponds to your Drupal content type machine name.
 
-### Configure Drupal DDP
-*Navigate to Drupal DDP Settings page to configure settings* (http://yourdrupalsite.dev/admin/config/development/ddp-connect)
-- Specify `Drupal DDP node server URL`
-- Specify `Meteor app URL`
-- Select which content types you want to use with Drupal DDP.
+### Writing data back to Drupal
+Currently, only nodes are supported for writing back to Drupal.
 
-### Create content
-Creating content that has been selected for use with DDP will pass a json encoded node object over to your meteor app.
+In order to write node data back to Drupal, pass a single object to the `updateNodeInDrupal` method:
 
+`Meteor.call('updateNodeInDrupal', this);`
+
+### Syncing Existing Content
+Existing Node, User and Taxonomy data can be synced to Meteor from the Drupal Module settings page.
+
+Users can be synced from Drupal, but their accounts won't be verified in Meteor until a password change happens from Drupal. Once a user password is updated in Drupal, then you can login to Drupal & Meteor with the same password.
