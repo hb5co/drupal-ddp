@@ -34,11 +34,18 @@ Meteor.methods({
       }
       else if(data.content.delete_content){
         // Delete existing taxonomies.
-        drupalDdpTaxonomies.remove({"content.tid": data.content.tid});
+        drupalDdpTaxonomies.remove({'content.tid': data.content.tid});
       }
       else {
-        // Update existing taxonomies.
-        drupalDdpTaxonomies.upsert({"content.tid": data.content.tid},{$set:{content:data.content}});
+        drupalDdpTaxonomies.upsert({
+          content: {
+            tid: data.content.tid
+          },
+        },{
+          $set:{
+            content: data.content
+          }
+        });
       }
     }
 
