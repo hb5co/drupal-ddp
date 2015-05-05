@@ -45,7 +45,7 @@ Currently, only nodes are supported for writing back to Drupal.
 
 In order to write node data back to Drupal, pass a single object to the `updateNodeInDrupal` method:
 
-`Meteor.call('updateNodeInDrupal', this);`
+`Meteor.call('updateNodeInDrupal', object);`
 
 ### Syncing Existing Content
 Existing Node, User and Taxonomy data can be synced to Meteor from the Drupal Module settings page.
