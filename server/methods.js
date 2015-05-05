@@ -14,14 +14,13 @@ Meteor.methods({
       if (!actualColl) {
         throw new Meteor.Error("You haven't registered this type of collection yet.");
       }
-      if (data.content.is_new) {
-        // Add new posts.
-        actualColl.insert(data);
-      }
-      else if(data.content.delete_content){
+
+      // If content is flagged for deletion, remove
+      if(data.content.delete_content){
         // Delete existing posts.
         actualColl.remove({nid: data.content.nid});
       }
+      // Otherwise, insert/update.
       else {
         // Update existing posts.
         actualColl.upsert({nid: data.content.nid},{$set: data.content});
@@ -55,26 +54,25 @@ Meteor.methods({
         'pass',
         'ddp_type'
       ];
-      profile_data = _.omit(data.content, cleanUpProfile);
+      profileData = _.omit(data.content, cleanUpProfile);
 
       // If a user doesn't exist, create one.
       if(!(Meteor.users.findOne({"profile.uid" : data.content.uid}))) {      
         // Create User
+
         Accounts.createUser({
           username: data.content.name,
           email : data.content.mail,
           password : data.content.pass,
-          profile  : profile_data
+          profile  : profileData
         });
 
-        // Set account 'verified' to true and set password to drupal password.
-        Meteor.users.update({"profile.uid" : data.content.uid}, {$set: {"emails.0.verified" : true}});
         Meteor.users.update({"profile.uid" : data.content.uid}, {$set: {"services.password.bcrypt" : data.content.pass}});
       }
       else if(data.content.delete_content){
         // Delete existing user.
-        user_id = Meteor.users.findOne({"profile.uid" : data.content.uid})._id;
-        Meteor.users.remove(user_id);
+        userId = Meteor.users.findOne({"profile.uid" : data.content.uid})._id;
+        Meteor.users.remove(userId);
       }
       else {
         Meteor.users.update(
@@ -84,11 +82,26 @@ Meteor.methods({
               "emails.0.address" : data.content.mail,
               "username" : data.content.name,
               "services.password.bcrypt" : data.content.pass,
-              "profile" : profile_data
+              "profile" : profileData
             },
           }
         );
       }
+    }
+
+    if (data.content.ddp_type === 'update_user_password') {
+      var bcrypt = NpmModuleBcrypt;
+      var bcryptHash = Meteor.wrapAsync(bcrypt.hash);
+      
+      var userId = Meteor.users.findOne({
+        'profile.uid': data.content.uid
+      })._id;
+
+      var passwordHash = bcryptHash(data.content.sha_pass, 10);
+
+      // Set user password and 'verify' their account.
+      Meteor.users.update({_id : userId}, {$set: {"services.password.bcrypt" : passwordHash}});
+      Meteor.users.update({_id : userId}, {$set: {"emails.0.verified" : true}});
     }
   },
   getDrupalDdpToken: function() {
@@ -114,19 +127,15 @@ Meteor.methods({
 
       return tokenResponse;
     } catch (e) {
-      return false;
+      if (Meteor.settings.drupal_ddp.debug_data == true) {
+        return e;
+      } else {
+        return false;
+      }
     }
   },
   updateNodeInDrupal: function(node) {
     tokenCookie = Meteor.call('getDrupalDdpToken');
-
-    // Preparing the node to be sent back to Drupal.
-    node = node.content;
-    
-    if (Meteor.settings.drupal_ddp.debug_data == true) {
-      console.log('======== Content Going back to drupal ==========');
-      console.log(node);
-    }
 
     // These are items in a node that aren't supported for writing
     // via restws in Drupal.
@@ -143,7 +152,17 @@ Meteor.methods({
       'comment_count_new',
     ];
 
-    // Check for File fields and remove.
+    // Preparing the node to be sent back to Drupal.
+    if(node.hasOwnProperty('content')){
+      node = node.content;  
+    } else {
+      // Add '_id' to the list of fields to be removed from
+      // the node.
+      cleanUpNode.push('_id');
+    }    
+
+    // Check for File fields and Taxonomy fields to remove
+    // remove because restws can't handle the heat.
     _.each(node, function(value, key, obj){
       // If obj is array
       if(_.isArray(value) && !_.isNull(value) && !_.isEmpty(value)) {
@@ -164,6 +183,11 @@ Meteor.methods({
     // Remove fields from node object that aren't supported
     // for writing back to drupal.
     node = _.omit(node, cleanUpNode);
+
+    if (Meteor.settings.drupal_ddp.debug_data == true) {
+      console.log('======== Content Going back to drupal ==========');
+      console.log(node);
+    }
 
     if (tokenCookie) {
       try {
@@ -189,7 +213,7 @@ Meteor.methods({
           console.log(e);
           console.log('====== END: Server Response ======');
         }
-        return false;
+        return e;
       }
     }
   },
