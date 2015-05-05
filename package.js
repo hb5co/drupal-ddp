@@ -2,7 +2,7 @@ Package.describe({
   name: 'hb5:drupal-ddp',
   summary: 'Drupal and Meteor integration over DDP',
   git: 'https://github.com/hb5co/drupal-ddp',
-  version: '0.0.1'
+  version: '0.0.2'
 });
 
 Package.onUse(function(api) {
@@ -18,9 +18,7 @@ Package.onUse(function(api) {
 
   // Files for Client & Server
   api.addFiles([
-    'collections/nodes.js',
     'collections/taxonomies.js',
-    'collections/users.js'
     ], both);
 
   // Files for Server
@@ -30,7 +28,6 @@ Package.onUse(function(api) {
     ], 'server');
 
   // Publish Collections to Client
-  api.export('drupalDdpNodes');
   api.export('drupalDdpTaxonomies');
   api.export('DrupalDdp');
 });
