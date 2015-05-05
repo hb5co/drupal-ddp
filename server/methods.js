@@ -66,15 +66,12 @@ Meteor.methods({
       // If a user doesn't exist, create one.
       if(!(Meteor.users.findOne({"profile.uid" : data.content.uid}))) {      
         // Create User
-
         Accounts.createUser({
           username: data.content.name,
           email : data.content.mail,
           password : data.content.pass,
           profile  : profileData
         });
-
-        Meteor.users.update({"profile.uid" : data.content.uid}, {$set: {"services.password.bcrypt" : data.content.pass}});
       }
       else if(data.content.delete_content){
         // Delete existing user.
@@ -88,7 +85,6 @@ Meteor.methods({
             {
               "emails.0.address" : data.content.mail,
               "username" : data.content.name,
-              "services.password.bcrypt" : data.content.pass,
               "profile" : profileData
             },
           }
