@@ -1,1 +1,0 @@
-drupalDdpUsers = Meteor.users;
