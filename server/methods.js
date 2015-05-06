@@ -64,7 +64,7 @@ Meteor.methods({
       profileData = _.omit(data.content, cleanUpProfile);
 
       // If a user doesn't exist, create one.
-      if(!(Meteor.users.findOne({"profile.uid" : data.content.uid}))) {      
+      if(!(Meteor.users.findOne({'profile.uid' : data.content.uid}))) {      
         // Create User
         Accounts.createUser({
           username: data.content.name,
@@ -75,17 +75,17 @@ Meteor.methods({
       }
       else if(data.content.delete_content){
         // Delete existing user.
-        userId = Meteor.users.findOne({"profile.uid" : data.content.uid})._id;
+        userId = Meteor.users.findOne({'profile.uid' : data.content.uid})._id;
         Meteor.users.remove(userId);
       }
       else {
         Meteor.users.update(
-          {"profile.uid" : data.content.uid}, 
+          {'profile.uid' : data.content.uid}, 
           {$set: 
             {
-              "emails.0.address" : data.content.mail,
-              "username" : data.content.name,
-              "profile" : profileData
+              'emails.0.address' : data.content.mail,
+              'username' : data.content.name,
+              'profile' : profileData
             },
           }
         );
@@ -95,16 +95,32 @@ Meteor.methods({
     if (data.content.ddp_type === 'update_user_password') {
       var bcrypt = NpmModuleBcrypt;
       var bcryptHash = Meteor.wrapAsync(bcrypt.hash);
-      
-      var userId = Meteor.users.findOne({
-        'profile.uid': data.content.uid
-      })._id;
-
       var passwordHash = bcryptHash(data.content.sha_pass, 10);
 
+      var userId = null;
+      
+      // In the event that the user doesn't exist yet,
+      // (very rare), create the user with basic info.
+      if(!(Meteor.users.findOne({'profile.uid' : data.content.uid}))) {
+        userId = Accounts.createUser({
+          username: data.content.name,
+          email : data.content.mail,
+          password : data.content.sha_pass,
+          profile: {
+            uid : data.content.uid
+          }
+        });
+      } else {
+        userId = Meteor.users.findOne({
+          'profile.uid': data.content.uid
+        })._id;
+      }
+
       // Set user password and 'verify' their account.
-      Meteor.users.update({_id : userId}, {$set: {"services.password.bcrypt" : passwordHash}});
-      Meteor.users.update({_id : userId}, {$set: {"emails.0.verified" : true}});
+      Meteor.users.update({_id : userId}, {$set: {'services.password.bcrypt' : passwordHash}});
+      Meteor.users.update({_id : userId}, {$set: {'emails.0.verified' : true}});
+
+      
     }
   },
   getDrupalDdpToken: function() {
