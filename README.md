@@ -1,5 +1,5 @@
 ## Drupal-Ddp
-Drupal and Meteor integration over DDP. This meteor package requires the [Drupal DDP drupal module](http://drupal.org/project/drupal_ddp) to function.
+Drupal and Meteor integration over DDP. This meteor package requires the [Drupal DDP drupal module](https://www.drupal.org/sandbox/bfodeke/2354859) to function.
 
 Once set up, it allows Drupal's Node, Taxonomy, and User objects to be synced over to your meteor application.
 
