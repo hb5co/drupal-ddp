@@ -29,22 +29,15 @@ Meteor.methods({
 
     // Handle Taxonomies
     if(data.content.ddp_type == 'taxonomy'){
-      if (data.content.is_new) {
-        drupalDdpTaxonomies.insert(data);
-      }
-      else if(data.content.delete_content){
+      if(data.content.delete_content){
         // Delete existing taxonomies.
-        drupalDdpTaxonomies.remove({'content.tid': data.content.tid});
+        drupalDdpTaxonomies.remove({tid: data.content.tid});
       }
       else {
         drupalDdpTaxonomies.upsert({
-          content: {
-            tid: data.content.tid
-          },
+          tid: data.content.tid
         },{
-          $set:{
-            content: data.content
-          }
+          $set: data.content
         });
       }
     }
@@ -63,8 +56,12 @@ Meteor.methods({
       ];
       profileData = _.omit(data.content, cleanUpProfile);
 
-      // If a user doesn't exist, create one.
-      if(!(Meteor.users.findOne({'profile.uid' : data.content.uid}))) {      
+      if(data.content.delete_content){
+        // Delete existing user.
+        userId = Meteor.users.findOne({'profile.uid' : data.content.uid})._id;
+        Meteor.users.remove(userId);
+      }
+      else if(!(Meteor.users.findOne({'profile.uid' : data.content.uid}))) {      
         // Create User
         Accounts.createUser({
           username: data.content.name,
@@ -72,11 +69,6 @@ Meteor.methods({
           password : data.content.pass,
           profile  : profileData
         });
-      }
-      else if(data.content.delete_content){
-        // Delete existing user.
-        userId = Meteor.users.findOne({'profile.uid' : data.content.uid})._id;
-        Meteor.users.remove(userId);
       }
       else {
         Meteor.users.update(
@@ -99,8 +91,9 @@ Meteor.methods({
 
       var userId = null;
       
-      // In the event that the user doesn't exist yet,
-      // (very rare), create the user with basic info.
+      // In the event that the user doesn't exist yet
+      // (very rare) AND the 'update_user_password' request
+      // arrives, then create the user with basic info.
       if(!(Meteor.users.findOne({'profile.uid' : data.content.uid}))) {
         userId = Accounts.createUser({
           username: data.content.name,
@@ -119,8 +112,6 @@ Meteor.methods({
       // Set user password and 'verify' their account.
       Meteor.users.update({_id : userId}, {$set: {'services.password.bcrypt' : passwordHash}});
       Meteor.users.update({_id : userId}, {$set: {'emails.0.verified' : true}});
-
-      
     }
   },
   getDrupalDdpToken: function() {
