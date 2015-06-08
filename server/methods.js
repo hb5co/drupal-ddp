@@ -7,7 +7,7 @@ Meteor.methods({
     if (Meteor.settings.drupal_ddp.debug_data === true) {
       console.log(data);
     }
-    
+
     // Handle Nodes
     if(data.content.ddp_type == 'node'){
       var actualColl = DrupalDdp.collections[data.content.type];
@@ -29,12 +29,13 @@ Meteor.methods({
 
     // Handle Taxonomies
     if(data.content.ddp_type == 'taxonomy'){
+      var actualTax = DrupalDdp.taxonomies[data.content.vocabulary_machine_name];
       if(data.content.delete_content){
         // Delete existing taxonomies.
-        drupalDdpTaxonomies.remove({tid: data.content.tid});
+        actualTax.remove({tid: data.content.tid});
       }
       else {
-        drupalDdpTaxonomies.upsert({
+        actualTax.upsert({
           tid: data.content.tid
         },{
           $set: data.content
@@ -61,7 +62,7 @@ Meteor.methods({
         userId = Meteor.users.findOne({'profile.uid' : data.content.uid})._id;
         Meteor.users.remove(userId);
       }
-      else if(!(Meteor.users.findOne({'profile.uid' : data.content.uid}))) {      
+      else if(!(Meteor.users.findOne({'profile.uid' : data.content.uid}))) {
         // Create User
         Accounts.createUser({
           username: data.content.name,
@@ -72,8 +73,8 @@ Meteor.methods({
       }
       else {
         Meteor.users.update(
-          {'profile.uid' : data.content.uid}, 
-          {$set: 
+          {'profile.uid' : data.content.uid},
+          {$set:
             {
               'emails.0.address' : data.content.mail,
               'username' : data.content.name,
@@ -90,7 +91,7 @@ Meteor.methods({
       var passwordHash = bcryptHash(data.content.sha_pass, 10);
 
       var userId = null;
-      
+
       // In the event that the user doesn't exist yet
       // (very rare) AND the 'update_user_password' request
       // arrives, then create the user with basic info.
@@ -133,11 +134,11 @@ Meteor.methods({
       tokenResponse = {
         token: result.content,
         cookie: result.headers['set-cookie'][0],
-      }
+      };
 
       return tokenResponse;
     } catch (e) {
-      if (Meteor.settings.drupal_ddp.debug_data == true) {
+      if (Meteor.settings.drupal_ddp.debug_data === true) {
         return e;
       } else {
         return false;
@@ -164,12 +165,12 @@ Meteor.methods({
 
     // Preparing the node to be sent back to Drupal.
     if(node.hasOwnProperty('content')){
-      node = node.content;  
+      node = node.content;
     } else {
       // Add '_id' to the list of fields to be removed from
       // the node.
       cleanUpNode.push('_id');
-    }    
+    }
 
     // Check for File fields and Taxonomy fields to remove
     // remove because restws can't handle the heat.
@@ -194,7 +195,7 @@ Meteor.methods({
     // for writing back to drupal.
     node = _.omit(node, cleanUpNode);
 
-    if (Meteor.settings.drupal_ddp.debug_data == true) {
+    if (Meteor.settings.drupal_ddp.debug_data === true) {
       console.log('======== Content Going back to drupal ==========');
       console.log(node);
     }
@@ -202,10 +203,10 @@ Meteor.methods({
     if (tokenCookie) {
       try {
         baseUrl = Meteor.settings.drupal_ddp.ddp_url;
-        endpoint = baseUrl + '/node/' + node.nid; 
+        endpoint = baseUrl + '/node/' + node.nid;
 
         var result = HTTP.put(
-          endpoint, 
+          endpoint,
           {
             headers: {
               'Content-type': 'application/json',
