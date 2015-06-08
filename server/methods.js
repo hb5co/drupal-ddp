@@ -29,12 +29,13 @@ Meteor.methods({
 
     // Handle Taxonomies
     if(data.content.ddp_type == 'taxonomy'){
+      var actualTax = DrupalDdp.taxonomies[data.content.vocabulary_machine_name];
       if(data.content.delete_content){
         // Delete existing taxonomies.
-        drupalDdpTaxonomies.remove({tid: data.content.tid});
+        actualTax.remove({tid: data.content.tid});
       }
       else {
-        drupalDdpTaxonomies.upsert({
+        actualTax.upsert({
           tid: data.content.tid
         },{
           $set: data.content
