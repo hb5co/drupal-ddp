@@ -49,7 +49,7 @@ Where ***`article`*** corresponds to your Drupal content type machine name.
 ### Writing data back to Drupal
 Currently, only nodes are supported for writing back to Drupal.
 
-In order to write node data back to Drupal, pass a single object to the `updateNodeInDrupal` method:
+In order to write node data back to Drupal, pass a single (node) object to the `updateNodeInDrupal` method:
 
 `Meteor.call('updateNodeInDrupal', object);`
 
