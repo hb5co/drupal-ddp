@@ -4,18 +4,25 @@ Meteor.methods({
   },
   // Accept node inserts and updates from Drupal.
   DrupalSaveNode: function (data) {
+    // Implementation of simple security.
+    if (Meteor.settings.drupal_ddp.simple_security === true) {
+      if (Meteor.settings.drupal_ddp.simple_security_token !== data.simple_security) {
+        throw new Meteor.Error("Security token does not match!");
+      }
+    }
+
     if (Meteor.settings.drupal_ddp.debug_data === true) {
       console.log(data);
     }
 
-    // Handle Nodes
+    // Handle Nodes.
     if(data.content.ddp_type == 'node'){
       var actualColl = DrupalDdp.collections[data.content.type];
       if (!actualColl) {
         throw new Meteor.Error("You haven't registered this type of collection yet.");
       }
 
-      // If content is flagged for deletion, remove
+      // If content is flagged for deletion, remove.
       if(data.content.delete_content){
         // Delete existing posts.
         actualColl.remove({nid: data.content.nid});
@@ -27,7 +34,7 @@ Meteor.methods({
       }
     }
 
-    // Handle Taxonomies
+    // Handle Taxonomies.
     if(data.content.ddp_type == 'taxonomy'){
       var actualTax = DrupalDdp.taxonomies[data.content.vocabulary_machine_name];
       if(data.content.delete_content){
@@ -43,7 +50,7 @@ Meteor.methods({
       }
     }
 
-    // Handle Users
+    // Handle Users.
     if(data.content.ddp_type == 'user'){
       // Clean up data and prepare profile information
       cleanUpProfile = [
@@ -63,7 +70,7 @@ Meteor.methods({
         Meteor.users.remove(userId);
       }
       else if(!(Meteor.users.findOne({'profile.uid' : data.content.uid}))) {
-        // Create User
+        // Create User.
         Accounts.createUser({
           username: data.content.name,
           email : data.content.mail,
@@ -172,7 +179,7 @@ Meteor.methods({
       cleanUpNode.push('_id');
     }
 
-    // Check for File fields and Taxonomy fields to remove
+    // Check for File fields and Taxonomy fields to
     // remove because restws can't handle the heat.
     _.each(node, function(value, key, obj){
       // If obj is array
