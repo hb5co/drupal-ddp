@@ -18,7 +18,7 @@ Below is a sample `settings.json` file to be included in the root of your Meteor
 			"restws_user": "restws_xxxxx",
 			"restws_pass": "your_password",
 			"simple_security": true,
-    	"simple_security_token": "kZtVE4rsE@U3#UD3tgxy5F@QZfjETM"
+			"simple_security_token": "kZtVE4rsE@U3#UD3tgxy5F@QZfjETM"
 		}
 	}
 
