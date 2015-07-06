@@ -18,7 +18,7 @@ Below is a sample `settings.json` file to be included in the root of your Meteor
 			"restws_user": "restws_xxxxx",
 			"restws_pass": "your_password",
 			"simple_security": true,
-			"simple_security_token": "kZtVE4rsE@U3#UD3tgxy5F@QZfjETM"
+			"simple_security_token": "your_security_token"
 		}
 	}
 
@@ -53,7 +53,11 @@ In order to write node data back to Drupal, pass a single (node) object to the `
 
 `Meteor.call('updateNodeInDrupal', object);`
 
+### Users
+If the `drupal_ddp_users` module is enabled, user accounts can sync over to Meteor from Drupal. Once synced, a user can login to Drupal and Meteor with the same credentials.
+
 ### Syncing Existing Content
 Existing Node, User and Taxonomy data can be synced to Meteor from the Drupal Module settings page.
 
 Users can be synced from Drupal, but their accounts won't be verified in Meteor until a password change happens from Drupal. Once a user password is updated in Drupal, then you can login to Drupal & Meteor with the same password.
+
