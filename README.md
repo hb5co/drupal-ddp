@@ -12,11 +12,16 @@ A settings.json file is required during the startup of your meteor app.
 Below is a sample `settings.json` file to be included in the root of your Meteor project.
 
 	{
+    "public": {
+      "drupal_ddp_access_private_files": true
+    },
 		"drupal_ddp": {
 			"debug_data": true,
 			"ddp_url": "http://drupalddp.dev",
 			"restws_user": "restws_xxxxx",
 			"restws_pass": "your_password",
+      "restws_read_user": "restws_readonly_xxxxx",
+      "restws_read_pass": "your_password",
 			"simple_security": true,
 			"simple_security_token": "your_security_token"
 		}
@@ -32,7 +37,14 @@ Below is a sample `settings.json` file to be included in the root of your Meteor
 - To enable simple security to prevent unauthorized ddp requests to your Meteor app, set `simple_security` to `true`.
 	- Simple Security Token (`simple_security_token`) is a token that should be set within your Drupal site.
 
-_Run your meteor using the settings.json file by running `meteor --settings ./settings.json` at the root of your app._
+**Private Files**
+
+- To enable drupal's private files to be accessible to Meteor, your **Drupal** and your **Meteor** sites must be on the same domain.
+  - Create a new user in Drupal with the `restws_readonly_` prefix that ONLY has rights to view private files.
+  - Add your new username and password to your settings.json file.
+  - Set `drupal_ddp_access_private_files` to `true` in the public section in your settings.json file.
+
+_Run your meteor using the settings.json file by running `meteor --settings settings.json` at the root of your app._
 
 
 ### Registering Content Types
