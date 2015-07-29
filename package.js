@@ -2,7 +2,7 @@ Package.describe({
   name: 'hb5:drupal-ddp',
   summary: 'Drupal and Meteor integration over DDP',
   git: 'https://github.com/hb5co/drupal-ddp',
-  version: '0.0.9'
+  version: '0.1.0'
 });
 
 Package.onUse(function(api) {
@@ -15,6 +15,11 @@ Package.onUse(function(api) {
   api.use([
     'mongo',
     'accounts-password'
+    ], both);
+
+  // Files for Client
+  api.addFiles([
+    'client/methods.js',
     ], both);
 
   // Files for Client & Server

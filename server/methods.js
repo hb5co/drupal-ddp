@@ -122,12 +122,20 @@ Meteor.methods({
       Meteor.users.update({_id : userId}, {$set: {'emails.0.verified' : true}});
     }
   },
-  getDrupalDdpToken: function() {
-    var options = {
-      url: Meteor.settings.drupal_ddp.ddp_url + "/restws/session/token",
-      username : Meteor.settings.drupal_ddp.restws_user,
-      password : Meteor.settings.drupal_ddp.restws_pass,
-    };
+  getDrupalDdpToken: function(type) {
+    if (type === 'read') {
+      var options = {
+        url: Meteor.settings.drupal_ddp.drupal_url + "/restws/session/token",
+        username : Meteor.settings.drupal_ddp.restws_read_user,
+        password : Meteor.settings.drupal_ddp.restws_read_pass,
+      };
+    } else {
+      var options = {
+        url: Meteor.settings.drupal_ddp.drupal_url + "/restws/session/token",
+        username : Meteor.settings.drupal_ddp.restws_user,
+        password : Meteor.settings.drupal_ddp.restws_pass,
+      };
+    }
 
     var auth = 'Basic ' + Meteor.call('base64Encode', options.username + ':' + options.password);
 
@@ -146,14 +154,14 @@ Meteor.methods({
       return tokenResponse;
     } catch (e) {
       if (Meteor.settings.drupal_ddp.debug_data === true) {
-        return e;
+        console.log(e);
       } else {
         return false;
       }
     }
   },
   updateNodeInDrupal: function(node) {
-    tokenCookie = Meteor.call('getDrupalDdpToken');
+    tokenCookie = Meteor.call('getDrupalDdpToken', 'write');
 
     // These are items in a node that aren't supported for writing
     // via restws in Drupal.
