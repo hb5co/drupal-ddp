@@ -156,7 +156,7 @@ Meteor.methods({
       if (Meteor.settings.drupal_ddp.debug_data === true) {
         console.log(e);
       } else {
-        return 'false';
+        return false;
       }
     }
   },
@@ -220,8 +220,6 @@ Meteor.methods({
         baseUrl = Meteor.settings.drupal_ddp.ddp_url;
         endpoint = baseUrl + '/node/' + node.nid;
 
-        console.log("Endpoint: " + endpoint);
-
         var result = HTTP.put(
           endpoint,
           {
@@ -237,13 +235,8 @@ Meteor.methods({
         return result;
       } catch (e) {
         if (Meteor.settings.drupal_ddp.debug_data === true) {
-          console.log('====== START: Server Response (x) ======');
+          console.log('====== START: Server Response ======');
           console.log(e);
-
-          baseUrl = Meteor.settings.drupal_ddp.ddp_url;
-          endpoint = baseUrl + '/node/' + node.nid;
-
-          console.log("Endpoint: " + endpoint);
           console.log('====== END: Server Response ======');
         }
         return e;
