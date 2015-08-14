@@ -3,6 +3,8 @@ Drupal and Meteor integration over DDP. This meteor package requires the [Drupa
 
 Once set up, it allows Drupal's Node, Taxonomy, and User objects to be synced over to your meteor application.
 
+<img src="https://www.drupal.org/files/project-images/Drupal%20DDP%20Architecture.png" />
+
 ### Installation
 Install package `meteor add hb5:drupal-ddp`
 
