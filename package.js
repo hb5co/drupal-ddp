@@ -14,7 +14,8 @@ Package.onUse(function(api) {
   // Packages for Client & Server
   api.use([
     'mongo',
-    'accounts-password'
+    'accounts-password',
+    'http'
     ], both);
 
   // Files for Client
