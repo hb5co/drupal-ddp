@@ -14,16 +14,15 @@ Meteor.methods({
     if (Meteor.settings.drupal_ddp.debug_data === true) {
       console.log(data);
     }
-
     // Handle Nodes.
-    if(data.content.ddp_type == 'node'){
+    if (data.content.ddp_type == 'node') {
       var actualColl = DrupalDdp.collections[data.content.type];
       if (!actualColl) {
         throw new Meteor.Error("You haven't registered this type of collection yet.");
       }
 
       // If content is flagged for deletion, remove.
-      if(data.content.delete_content){
+      if (data.content.delete_content) {
         // Delete existing posts.
         actualColl.remove({nid: data.content.nid});
       }
@@ -35,9 +34,9 @@ Meteor.methods({
     }
 
     // Handle Taxonomies.
-    if(data.content.ddp_type == 'taxonomy'){
+    if (data.content.ddp_type == 'taxonomy') {
       var actualTax = DrupalDdp.taxonomies[data.content.vocabulary_machine_name];
-      if(data.content.delete_content){
+      if (data.content.delete_content) {
         // Delete existing taxonomies.
         actualTax.remove({tid: data.content.tid});
       }
@@ -51,7 +50,7 @@ Meteor.methods({
     }
 
     // Handle Users.
-    if(data.content.ddp_type == 'user'){
+    if (data.content.ddp_type == 'user') {
       // Clean up data and prepare profile information
       cleanUpProfile = [
         'rdf_mapping',
@@ -64,12 +63,12 @@ Meteor.methods({
       ];
       profileData = _.omit(data.content, cleanUpProfile);
 
-      if(data.content.delete_content){
+      if (data.content.delete_content) {
         // Delete existing user.
         userId = Meteor.users.findOne({'profile.uid' : data.content.uid})._id;
         Meteor.users.remove(userId);
       }
-      else if(!(Meteor.users.findOne({'profile.uid' : data.content.uid}))) {
+      else if (!(Meteor.users.findOne({'profile.uid' : data.content.uid}))) {
         // Create User.
         Accounts.createUser({
           username: data.content.name,
@@ -102,7 +101,7 @@ Meteor.methods({
       // In the event that the user doesn't exist yet
       // (very rare) AND the 'update_user_password' request
       // arrives, then create the user with basic info.
-      if(!(Meteor.users.findOne({'profile.uid' : data.content.uid}))) {
+      if (!(Meteor.users.findOne({'profile.uid' : data.content.uid}))) {
         userId = Accounts.createUser({
           username: data.content.name,
           email : data.content.mail,
@@ -137,6 +136,11 @@ Meteor.methods({
       };
     }
 
+    if (Meteor.settings.drupal_ddp.debug_data === true) {
+      console.log('======== Connection Options ==========');
+      console.log(options);
+    }
+
     var auth = 'Basic ' + Meteor.call('base64Encode', options.username + ':' + options.password);
 
     try {
@@ -151,9 +155,15 @@ Meteor.methods({
         cookie: result.headers['set-cookie'][0],
       };
 
+      if (Meteor.settings.drupal_ddp.debug_data === true) {
+        console.log('======== Connection Successful: Token ==========');
+        console.log(tokenResponse);
+      }
+
       return tokenResponse;
     } catch (e) {
       if (Meteor.settings.drupal_ddp.debug_data === true) {
+        console.log('======== Error Creating Token ==========');
         console.log(e);
       } else {
         return false;
@@ -162,6 +172,17 @@ Meteor.methods({
   },
   updateNodeInDrupal: function(node) {
     tokenCookie = Meteor.call('getDrupalDdpToken', 'write');
+
+    if (Meteor.settings.drupal_ddp.debug_data === true) {
+      console.log('======== Base URL and Endpoint ==========');
+      console.log(Meteor.settings.drupal_ddp.drupal_url);
+      console.log(Meteor.settings.drupal_ddp.drupal_url + '/node/' + node.nid);
+    }
+
+    if (Meteor.settings.drupal_ddp.debug_data === true) {
+      console.log('======== Token (writing to Drupal) ==========');
+      console.log(tokenCookie);
+    }
 
     // These are items in a node that aren't supported for writing
     // via restws in Drupal.
@@ -176,10 +197,19 @@ Meteor.methods({
       'edit_url',
       'comment_count',
       'comment_count_new',
+      'revision',
+      'language',
+      'author',
+      'field_tags',
+      'field_image',
+      'created',
+      'status',
+      'promote',
+      'sticky',
     ];
 
     // Preparing the node to be sent back to Drupal.
-    if(node.hasOwnProperty('content')){
+    if (node.hasOwnProperty('content')) {
       node = node.content;
     } else {
       // Add '_id' to the list of fields to be removed from
@@ -191,16 +221,16 @@ Meteor.methods({
     // remove because restws can't handle the heat.
     _.each(node, function(value, key, obj){
       // If obj is array
-      if(_.isArray(value) && !_.isNull(value) && !_.isEmpty(value)) {
+      if (_.isArray(value) && !_.isNull(value) && !_.isEmpty(value)) {
         // If 'file' exists here, then it's a file_field,
         // add key cleanUpNode array.
-        if(_.has(value[0], 'file')) {
+        if (_.has(value[0], 'file')) {
           cleanUpNode.push(key);
         }
 
         // If 'tid' exists here, then it's a taxonomy term,
         // add key to cleanUpNode array.
-        if(_.has(value[0], 'tid')) {
+        if (_.has(value[0], 'tid')) {
           cleanUpNode.push(key);
         }
       }
@@ -217,8 +247,20 @@ Meteor.methods({
 
     if (tokenCookie) {
       try {
-        baseUrl = Meteor.settings.drupal_ddp.ddp_url;
+        baseUrl = Meteor.settings.drupal_ddp.drupal_url;
         endpoint = baseUrl + '/node/' + node.nid;
+
+        var requestHeaders = {
+          'Content-type': 'application/json',
+          'X-CSRF-Token': tokenCookie.token,
+          'Accept': 'application/json',
+          'Cookie': tokenCookie.cookie,
+        };
+
+        if (Meteor.settings.drupal_ddp.debug_data === true) {
+          console.log('======== Request Headers ==========');
+          console.log(requestHeaders);
+        }
 
         var result = HTTP.put(
           endpoint,
