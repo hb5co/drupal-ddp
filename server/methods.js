@@ -167,7 +167,7 @@ Meteor.methods({
     }
 
     if (Meteor.settings.drupal_ddp.debug_data === true) {
-      console.log('======== Connection Options ==========');
+      console.log('== Connection Options ==');
       console.log(options);
     }
 
@@ -186,34 +186,91 @@ Meteor.methods({
       };
 
       if (Meteor.settings.drupal_ddp.debug_data === true) {
-        console.log('======== Connection Successful: Token ==========');
+        console.log('== Connection Successful: Token ==');
         console.log(tokenResponse);
       }
 
       return tokenResponse;
     } catch (e) {
       if (Meteor.settings.drupal_ddp.debug_data === true) {
-        console.log('======== Error Creating Token ==========');
+        console.log('== Error Creating Token ==');
         console.log(e);
       } else {
         return false;
       }
     }
   },
-  updateNodeInDrupal: function(node) {
-    tokenCookie = Meteor.call('getDrupalDdpToken', 'write');
+  /**
+   * Function to update node content in Drupal.
+   *
+   * @parame node
+   *   JSON node content to write back to Drupal.
+   * @param numTries
+   *   Number of tries to write to Drupal. Accounts for the stored session token
+   *   being stale the first try around.
+   */
+  updateNodeInDrupal: function(node, numTries) {
+    // Setting default for numTries to 1.
+    numTries = typeof numTries !== 'undefined' ?  numTries : 1;
+    // If session token exist via ServerSession, then return the token.
+    var tokenCookie = ServerSession.get('restws_write_token');
 
     if (Meteor.settings.drupal_ddp.debug_data === true) {
-      console.log('======== Base URL and Endpoint ==========');
+      console.log('== Base URL and Endpoint ==');
       console.log(Meteor.settings.drupal_ddp.drupal_url);
       console.log(Meteor.settings.drupal_ddp.drupal_url + '/node/' + node.nid);
-    }
 
-    if (Meteor.settings.drupal_ddp.debug_data === true) {
-      console.log('======== Token (writing to Drupal) ==========');
+      console.log('== Token (writing to Drupal) ==');
       console.log(tokenCookie);
     }
 
+    // Clean up node to remove some unsupported fields in Drupal.
+    node = Meteor.call('cleanUpNode', node);
+
+    if (Meteor.settings.drupal_ddp.debug_data === true) {
+      console.log('== Content Going back to drupal ==');
+      console.log(node);
+    }
+
+    // Try to make connection and send data back to Drupal.
+    try {
+      baseUrl = Meteor.settings.drupal_ddp.drupal_url;
+      endpoint = baseUrl + '/node/' + node.nid;
+
+      var result = HTTP.put(
+        endpoint,
+        {
+          headers: {
+            'Content-type': 'application/json',
+            'X-CSRF-Token': tokenCookie.token,
+            'Accept': 'application/json',
+            'Cookie': tokenCookie.cookie,
+          },
+          data: node
+        }
+      );
+      return result;
+    } catch (e) {
+      if (numTries < 2) {
+        sessionToken = Meteor.call('getDrupalSessionToken', 'write');
+        ServerSession.set('restws_write_token', sessionToken);
+
+        console.log('== Cached session token invalid, fetching new session token. ==');
+        console.log(node);
+
+        // After new SessionToken is set, recursively call function.
+        numTries++;
+        Meteor.call('updateNodeInDrupal', node, numTries);
+      } else {
+        if (Meteor.settings.drupal_ddp.debug_data === true) {
+          console.log('== Server Response ==');
+          console.log(e);
+        }
+        return e;
+      }
+    }
+  },
+  cleanUpNode: function(node) {
     // These are items in a node that aren't supported for writing
     // via restws in Drupal.
     cleanUpNode = [
@@ -238,6 +295,7 @@ Meteor.methods({
       'sticky',
     ];
 
+    // Fix for any early adopters. content structure in meteor changed.
     // Preparing the node to be sent back to Drupal.
     if (node.hasOwnProperty('content')) {
       node = node.content;
@@ -270,49 +328,7 @@ Meteor.methods({
     // for writing back to drupal.
     node = _.omit(node, cleanUpNode);
 
-    if (Meteor.settings.drupal_ddp.debug_data === true) {
-      console.log('======== Content Going back to drupal ==========');
-      console.log(node);
-    }
-
-    if (tokenCookie) {
-      try {
-        baseUrl = Meteor.settings.drupal_ddp.drupal_url;
-        endpoint = baseUrl + '/node/' + node.nid;
-
-        var requestHeaders = {
-          'Content-type': 'application/json',
-          'X-CSRF-Token': tokenCookie.token,
-          'Accept': 'application/json',
-          'Cookie': tokenCookie.cookie,
-        };
-
-        if (Meteor.settings.drupal_ddp.debug_data === true) {
-          console.log('======== Request Headers ==========');
-          console.log(requestHeaders);
-        }
-
-        var result = HTTP.put(
-          endpoint,
-          {
-            headers: {
-              'Content-type': 'application/json',
-              'X-CSRF-Token': tokenCookie.token,
-              'Accept': 'application/json',
-              'Cookie': tokenCookie.cookie,
-            },
-            data: node
-          }
-        );
-        return result;
-      } catch (e) {
-        if (Meteor.settings.drupal_ddp.debug_data === true) {
-          console.log('====== START: Server Response ======');
-          console.log(e);
-          console.log('====== END: Server Response ======');
-        }
-        return e;
-      }
-    }
-  },
+    return node;
+  }
 });
+
