@@ -11,30 +11,33 @@ Package.onUse(function(api) {
 
   var both = ['client', 'server'];
 
-  // Packages for Client & Server
+  // Packages for Client & Server.
   api.use([
     'mongo',
     'accounts-password',
     'http'
     ], both);
 
-  // Files for Client
+  // Packages for Server.
+  api.use('matteodem:server-session', 'server');
+
+  // Files for Client.
   api.addFiles([
     'client/methods.js',
     ], both);
 
-  // Files for Client & Server
+  // Files for Client & Server.
   api.addFiles([
     'collections/taxonomies.js',
     ], both);
 
-  // Files for Server
+  // Files for Server.
   api.addFiles([
     'server/methods.js',
     'server/config.js'
     ], 'server');
 
-  // Publish Collections to Client
+  // Publish Collections to Client.
   api.export('drupalDdpTaxonomies');
   api.export('DrupalDdp');
 });
