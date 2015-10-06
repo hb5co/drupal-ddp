@@ -4,6 +4,7 @@ Meteor.methods({
   },
   // Accept node inserts and updates from Drupal.
   DrupalSaveNode: function (data) {
+    var currentTime = Math.floor(new Date().getTime() / 1000);
     // Implementation of simple security.
     if (Meteor.settings.drupal_ddp.simple_security === true) {
       if (Meteor.settings.drupal_ddp.simple_security_token !== data.simple_security) {
@@ -32,7 +33,6 @@ Meteor.methods({
       }
 
       // Return object as an acknowledgement of Meteor getting data.
-      var currentTime = Math.floor(new Date().getTime() / 1000);
       var returnMessage = {
         'nid': data.content.nid,
         'type': data.content.type,
@@ -57,7 +57,6 @@ Meteor.methods({
       }
 
       // Return object as an acknowledgement of Meteor getting data.
-      var currentTime = Math.floor(new Date().getTime() / 1000);
       var returnMessage = {
         'tid': data.content.tid,
         'vocab': data.content.vocabulary_machine_name,
@@ -108,7 +107,6 @@ Meteor.methods({
       }
 
       // Return object as an acknowledgement of Meteor getting data.
-      var currentTime = Math.floor(new Date().getTime() / 1000);
       var returnMessage = {
         'uid': data.content.uid,
         'timestamp': currentTime
