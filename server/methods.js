@@ -30,6 +30,15 @@ Meteor.methods({
         // Update existing posts.
         actualColl.upsert({nid: data.content.nid},{$set: data.content});
       }
+
+      // Return object as an acknowledgement of Meteor getting data.
+      var currentTime = Math.floor(new Date().getTime() / 1000);
+      var returnMessage = {
+        'nid': data.content.nid,
+        'type': data.content.type,
+        'timestamp': currentTime
+      };
+      return returnMessage;
     }
 
     // Handle Taxonomies.
@@ -46,6 +55,15 @@ Meteor.methods({
           $set: data.content
         });
       }
+
+      // Return object as an acknowledgement of Meteor getting data.
+      var currentTime = Math.floor(new Date().getTime() / 1000);
+      var returnMessage = {
+        'tid': data.content.tid,
+        'vocab': data.content.vocabulary_machine_name,
+        'timestamp': currentTime
+      };
+      return returnMessage;
     }
 
     // Handle Users.
@@ -88,6 +106,14 @@ Meteor.methods({
           }
         );
       }
+
+      // Return object as an acknowledgement of Meteor getting data.
+      var currentTime = Math.floor(new Date().getTime() / 1000);
+      var returnMessage = {
+        'uid': data.content.uid,
+        'timestamp': currentTime
+      };
+      return returnMessage;
     }
 
     if (data.content.ddp_type === 'update_user_password') {
@@ -118,6 +144,14 @@ Meteor.methods({
       // Set user password and 'verify' their account.
       Meteor.users.update({_id : userId}, {$set: {'services.password.bcrypt' : passwordHash}});
       Meteor.users.update({_id : userId}, {$set: {'emails.0.verified' : true}});
+
+      // Return object as an acknowledgement of Meteor getting data.
+      var currentTime = Math.floor(new Date().getTime() / 1000);
+      var returnMessage = {
+        'uid': data.content.uid,
+        'timestamp': currentTime
+      };
+      return returnMessage;
     }
   },
   getDrupalDdpToken: function(type) {
