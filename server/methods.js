@@ -144,7 +144,6 @@ Meteor.methods({
       Meteor.users.update({_id : userId}, {$set: {'emails.0.verified' : true}});
 
       // Return object as an acknowledgement of Meteor getting data.
-      var currentTime = Math.floor(new Date().getTime() / 1000);
       var returnMessage = {
         'uid': data.content.uid,
         'timestamp': currentTime
@@ -152,7 +151,7 @@ Meteor.methods({
       return returnMessage;
     }
   },
-  getDrupalDdpToken: function(type) {
+  getDrupalSessionToken: function(type) {
     if (type === 'read') {
       var options = {
         url: Meteor.settings.drupal_ddp.drupal_url + "/restws/session/token",
