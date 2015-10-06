@@ -11,9 +11,8 @@ Meteor.methods({
       }
     }
 
-    if (Meteor.settings.drupal_ddp.debug_data === true) {
-      console.log(data);
-    }
+    if (Meteor.settings.drupal_ddp.debug_data === true) { console.log(data); }
+
     // Handle Nodes.
     if (data.content.ddp_type == 'node') {
       var actualColl = DrupalDdp.collections[data.content.type];
