@@ -19,7 +19,7 @@ Below is a sample `settings.json` file to be included in the root of your Meteor
       },
       "drupal_ddp": {
         "debug_data": true,
-        "ddp_url": "http://drupalddp.dev",
+        "drupal_url": "http://your_drupal_url",
         "restws_user": "restws_xxxxx",
         "restws_pass": "your_password",
         "restws_read_user": "restws_readonly_xxxxx",

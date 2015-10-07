@@ -1,7 +1,7 @@
 if (Meteor.isClient) {
   Meteor.startup(function () {
     if (Meteor.settings.public.drupal_ddp_access_private_files === true) {
-      Meteor.call('getDrupalDdpToken', 'read', function(err, response) {
+      Meteor.call('getDrupalSessionToken', 'read', function(err, response) {
         if (!err) {
           // Getting the upper level domain of the current site.
           var urlParts = location.hostname.split('.');
