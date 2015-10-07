@@ -2,7 +2,7 @@ Package.describe({
   name: 'hb5:drupal-ddp',
   summary: 'Drupal and Meteor integration over DDP',
   git: 'https://github.com/hb5co/drupal-ddp',
-  version: '0.1.1'
+  version: '0.1.2'
 });
 
 Package.onUse(function(api) {
