@@ -263,7 +263,7 @@ Meteor.methods({
         Meteor.call('updateNodeInDrupal', node, numTries);
       } else {
         if (Meteor.settings.drupal_ddp.debug_data === true) {
-          console.log('== Server Response ==');
+          console.log('== Server Error Response ==');
           console.log(e);
         }
         return e;
