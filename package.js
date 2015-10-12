@@ -19,7 +19,7 @@ Package.onUse(function(api) {
     ], both);
 
   // Packages for Server.
-  api.use('matteodem:server-session', 'server');
+  api.use('matteodem:server-session@0.4.2', 'server');
 
   // Files for Client.
   api.addFiles([
