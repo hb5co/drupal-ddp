@@ -272,7 +272,7 @@ Meteor.methods({
           console.log('== Server Error Response ==');
           console.log(e);
         }
-        return e;
+        return false;
       }
     }
   },
