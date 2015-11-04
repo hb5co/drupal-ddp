@@ -254,6 +254,9 @@ Meteor.methods({
       );
       return result;
     } catch (e) {
+      // Try to send data with cached token, if that fails,
+      // get new token and try again.  If THAT fails, display
+      // error.
       if (numTries < 2) {
         sessionToken = Meteor.call('getDrupalSessionToken', 'write');
         ServerSession.set('restws_write_token', sessionToken);
