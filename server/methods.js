@@ -44,6 +44,9 @@ Meteor.methods({
     // Handle Taxonomies.
     if (data.content.ddp_type == 'taxonomy') {
       var actualTax = DrupalDdp.taxonomies[data.content.vocabulary_machine_name];
+      if (!actualTax) {
+        throw new Meteor.Error("You haven't registered this taxonomy vocabulary yet.");
+      }
       if (data.content.delete_content) {
         // Delete existing taxonomies.
         actualTax.remove({tid: data.content.tid});
