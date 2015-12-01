@@ -44,6 +44,9 @@ Meteor.methods({
     // Handle Taxonomies.
     if (data.content.ddp_type == 'taxonomy') {
       var actualTax = DrupalDdp.taxonomies[data.content.vocabulary_machine_name];
+      if (!actualTax) {
+        throw new Meteor.Error("You haven't registered this taxonomy vocabulary yet.");
+      }
       if (data.content.delete_content) {
         // Delete existing taxonomies.
         actualTax.remove({tid: data.content.tid});
@@ -251,6 +254,9 @@ Meteor.methods({
       );
       return result;
     } catch (e) {
+      // Try to send data with cached token, if that fails,
+      // get new token and try again.  If THAT fails, display
+      // error.
       if (numTries < 2) {
         sessionToken = Meteor.call('getDrupalSessionToken', 'write');
         ServerSession.set('restws_write_token', sessionToken);
@@ -266,7 +272,7 @@ Meteor.methods({
           console.log('== Server Error Response ==');
           console.log(e);
         }
-        return e;
+        return false;
       }
     }
   },
